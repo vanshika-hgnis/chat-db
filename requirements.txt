@@ -6,6 +6,8 @@ blinker==1.9.0
 cachetools==5.5.2
 certifi==2025.4.26
 charset-normalizer==3.4.2
+google-generativeai
+pyodbc
 click==8.1.8
 colorama==0.4.6
 faiss-cpu==1.11.0
