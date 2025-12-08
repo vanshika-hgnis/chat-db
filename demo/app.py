@@ -1,17 +1,16 @@
+# app.py
 import streamlit as st
 from db import run_sql
-from llm_ollama_cloud import nl_to_sql, create_report  # updated import
+from llm_ollama_cloud import nl_to_sql, create_report
 
-
+st.set_page_config(page_title="Cloud AI SQL Reporting (Ollama Cloud)", layout="wide")
 st.title("Cloud AI SQL Reporting (Ollama Cloud)")
 
-question = st.text_input("Ask a question about your database:")
+st.write(
+    "Ask questions in natural language. The system uses your DB schema (RAG) to generate SQL and a business report."
+)
 
-TABLE_SCHEMA = """
-Tables:
-  Employees(id, name, department, salary)
-  Sales(order_id, date, amount, customer)
-"""
+question = st.text_input("Ask a question about your database:")
 
 if st.button("Generate Report"):
 
@@ -19,8 +18,8 @@ if st.button("Generate Report"):
         st.error("Please type a question.")
         st.stop()
 
-    st.write("Generating SQL using Ollama Cloud...")
-    sql = nl_to_sql(question, TABLE_SCHEMA)
+    st.info("Generating SQL using Ollama Cloud + schema RAG...")
+    sql = nl_to_sql(question)
 
     st.code(sql, language="sql")
 
@@ -32,10 +31,10 @@ if st.button("Generate Report"):
 
     data = [dict(zip(columns, r)) for r in rows]
 
-    st.write("Data:")
-    st.dataframe(data)
+    st.subheader("Raw Data")
+    st.dataframe(data, use_container_width=True)
 
-    st.write("Generating Report...")
+    st.info("Generating business report...")
     report = create_report(question, data)
 
     st.subheader("Report")
