@@ -26,3 +26,10 @@ This creates: data/join_graph.json.
 ✔️ JOIN-inference engine - Done
 ✔️ Generating Python/Pandas from queries
 ✔️ Add schema visualization page
+I can extend chart generator to:
+
+✔ Support heatmaps
+✔ Correlation matrix for numeric-heavy data
+✔ Auto-detect time-series gaps
+✔ Suggest best chart based on statistical distribution
+✔ Let LLM choose chart type
