@@ -23,6 +23,6 @@ This creates: data/join_graph.json.
 # Functionalities i want
 
 ✔️ Auto SQL repair loop
-✔️ JOIN-inference engine
+✔️ JOIN-inference engine - Done
 ✔️ Generating Python/Pandas from queries
 ✔️ Add schema visualization page
