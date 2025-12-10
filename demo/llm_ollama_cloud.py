@@ -3,6 +3,8 @@ import os
 from ollama import Client
 from dotenv import load_dotenv
 from rag_index import retrieve_schema_snippets
+from join_graph import suggest_join_hints
+
 
 load_dotenv()
 
@@ -30,6 +32,12 @@ def call_ollama(prompt: str) -> str:
 def nl_to_sql(question: str) -> str:
     # RAG: get relevant schema descriptions
     snippets = retrieve_schema_snippets(question, top_k=5)
+    # JOIN hints from graph
+    try:
+        join_hints = suggest_join_hints(question)
+    except FileNotFoundError:
+        join_hints = ""
+
     schema_context = "\n\n".join(snippets)
 
     prompt = f"""
@@ -39,6 +47,10 @@ Use ONLY the schema information provided below.
 
 SCHEMA CONTEXT:
 {schema_context}
+
+JOIN HINTS:
+{join_hints or '(no specific hints, infer joins from column names and schema)'}
+
 
 TASK:
 - Generate a single safe SELECT SQL query that answers the user's question.

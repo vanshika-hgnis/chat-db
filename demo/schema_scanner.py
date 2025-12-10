@@ -5,14 +5,11 @@ from db import get_connection
 from decimal import Decimal
 from datetime import datetime, date, time
 
-
 DATA_DIR = "data"
 SCHEMA_JSON = os.path.join(DATA_DIR, "db_schema.json")
+TABLE_LIST_TXT = os.path.join(DATA_DIR, "table_list.txt")
 
 
-# -----------------------------------------
-# Convert SQL row values → JSON-safe values
-# -----------------------------------------
 def safe_value(v):
     if isinstance(v, (str, int, float, bool)) or v is None:
         return v
@@ -20,7 +17,6 @@ def safe_value(v):
         return float(v)
     if isinstance(v, (datetime, date, time)):
         return v.isoformat()
-    # Fallback: force string
     return str(v)
 
 
@@ -30,7 +26,6 @@ def scan_schema(max_sample_rows: int = 3):
     conn = get_connection()
     cur = conn.cursor()
 
-    # Get all tables
     cur.execute(
         """
         SELECT TABLE_SCHEMA, TABLE_NAME
@@ -42,9 +37,11 @@ def scan_schema(max_sample_rows: int = 3):
     tables = cur.fetchall()
 
     schema_info = []
+    table_list = []
 
     for schema, table in tables:
-        # Columns
+        table_list.append(f"{schema}.{table}")
+
         cur.execute(
             """
             SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE
@@ -57,39 +54,33 @@ def scan_schema(max_sample_rows: int = 3):
         cols = cur.fetchall()
 
         columns_struct = [
-            {
-                "name": c[0],
-                "type": c[1],
-                "nullable": (c[2] == "YES"),
-            }
-            for c in cols
+            {"name": c[0], "type": c[1], "nullable": (c[2] == "YES")} for c in cols
         ]
 
-        # Sample rows (safe conversion)
-        sample_rows = []
         col_names = [c[0] for c in cols]
+        sample_rows = []
 
         try:
             cur.execute(f"SELECT TOP ({max_sample_rows}) * FROM [{schema}].[{table}]")
             rows = cur.fetchall()
-
             for row in rows:
-                row_dict = {}
+                safe_row = {}
                 for k, v in zip(col_names, row):
-                    row_dict[k] = safe_value(v)
-                sample_rows.append(row_dict)
+                    safe_row[k] = safe_value(v)
+                sample_rows.append(safe_row)
+        except:
+            pass
 
-        except Exception:
-            sample_rows = []
-
-        # Schema text for RAG
-        col_desc = ", ".join(
-            f"{c['name']} ({c['type']}){' NULL' if c['nullable'] else ' NOT NULL'}"
+        col_text = ", ".join(
+            f"{c['name']} ({c['type']}){' NULL' if c['nullable'] else ''}"
             for c in columns_struct
         )
-        text = f"Table [{schema}].[{table}] with columns: {col_desc}."
+
+        text = f"Table [{schema}].[{table}] columns: {col_text}."
+        if table.lower() in ["allowance", "allowances"]:
+            text = "This table stores allowance configuration. " + text
         if sample_rows:
-            text += f" Example rows: {sample_rows[:max_sample_rows]}"
+            text += f" Example rows: {sample_rows}"
 
         schema_info.append(
             {
@@ -106,8 +97,13 @@ def scan_schema(max_sample_rows: int = 3):
     with open(SCHEMA_JSON, "w", encoding="utf-8") as f:
         json.dump(schema_info, f, ensure_ascii=False, indent=2)
 
-    print(f"Schema saved to {SCHEMA_JSON} ({len(schema_info)} tables).")
-    return schema_info
+    with open(TABLE_LIST_TXT, "w", encoding="utf-8") as f:
+        for t in table_list:
+            f.write(t + "\n")
+
+    print("Schema extracted successfully.")
+    print(f"- Tables: {len(table_list)}")
+    print(f"- Saved: {SCHEMA_JSON}, {TABLE_LIST_TXT}")
 
 
 if __name__ == "__main__":
