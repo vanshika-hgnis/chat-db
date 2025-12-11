@@ -2,8 +2,13 @@
 import streamlit as st
 from db import run_sql
 from llm_ollama_cloud import nl_to_sql, create_report
-from chart_generator import generate_chart
+
+# ? replace the  OG chart generation with the services module
+# from chart_generator import generate_chart
+
 import pandas as pd
+from services.char_service import generate_chart
+
 
 st.set_page_config(page_title="Cloud AI SQL Reporting", layout="wide")
 st.title("Cloud AI SQL Reporting (Ollama Cloud)")
@@ -38,7 +43,8 @@ if st.button("Generate Report"):
     st.write(report)
 
     st.subheader("Charts")
-    fig, msg = generate_chart(pd.DataFrame(data))
+    # fig, msg = generate_chart(pd.DataFrame(data))
+    fig, msg = generate_chart(pd.DataFrame(data), question)
     if fig:
         st.plotly_chart(fig, use_container_width=True)
     else:
