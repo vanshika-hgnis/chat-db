@@ -10,8 +10,8 @@ import pandas as pd
 from services.char_service import generate_chart
 
 
-st.set_page_config(page_title="Cloud AI SQL Reporting", layout="wide")
-st.title("Cloud AI SQL Reporting (Ollama Cloud)")
+st.set_page_config(page_title="AI Database Reporting", layout="wide")
+st.title("AI Database Reporting")
 
 question = st.text_input("Ask a question about your database:")
 
