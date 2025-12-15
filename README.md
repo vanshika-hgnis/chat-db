@@ -33,3 +33,15 @@ I can extend chart generator to:
 ✔ Auto-detect time-series gaps
 ✔ Suggest best chart based on statistical distribution
 ✔ Let LLM choose chart type
+
+User Question
+↓
+Generate SQL (LLM)
+↓
+Validate SQL (tables, columns, safety)
+↓
+Execute SQL
+↓
+❌ Error?
+├─ Yes → Repair Prompt → New SQL → Retry (max N)
+└─ No → Accept → Continue
