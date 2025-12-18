@@ -34,14 +34,23 @@ I can extend chart generator to:
 ✔ Suggest best chart based on statistical distribution
 ✔ Let LLM choose chart type
 
-User Question
-↓
-Generate SQL (LLM)
-↓
-Validate SQL (tables, columns, safety)
-↓
-Execute SQL
-↓
-❌ Error?
-├─ Yes → Repair Prompt → New SQL → Retry (max N)
-└─ No → Accept → Continue
+# SQL Generation Loop - auto repair
+
+### current
+
+Question
+→ nl_to_sql()
+→ LLM SQL
+→ run_sql(sql)
+→ ERROR or EMPTY RESULT
+→ report
+
+### Upgrade
+
+Question
+→ nl_to_sql()
+→ SQL
+→ validate_sql(sql) ❌ fail → repair
+→ run_sql(sql) ❌ error → repair
+→ check_result(rows) ❌ empty → repair
+→ final SQL (trusted)

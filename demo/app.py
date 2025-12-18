@@ -25,6 +25,13 @@ if st.button("Generate Report"):
     sql = nl_to_sql(question)
     st.code(sql, language="sql")
 
+    #! TODO: First test it before pushing
+    #     sql, columns, rows = sql_with_auto_repair(
+    #     generate_sql_fn=nl_to_sql,
+    #     run_sql_fn=run_sql,
+    #     question=question
+    # )
+
     try:
         columns, rows = run_sql(sql)
     except Exception as e:
